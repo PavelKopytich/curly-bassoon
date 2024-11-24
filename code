@@ -1,0 +1,64 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+
+public class UserDataProcessor {
+    public static void main(String[] args) {
+        try {
+            String input = "Иванов Иван Иванович 25.12.1990 1234567890 m";
+            String[] data = input.split(" ");
+
+            if (data.length != 6) {
+                throw new IllegalArgumentException("Неверное количество введенных данных.");
+            }
+
+            String surname = data[0];
+            String name = data[1];
+            String patronymic = data[2];
+            LocalDate birthDate = parseDate(data[3]);
+            long phoneNumber = parsePhoneNumber(data[4]);
+            char gender = parseGender(data[5]);
+
+            String output = String.format("%s %s %s %s %d %c", surname, name, patronymic, birthDate, phoneNumber, gender);
+
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(surname, true))) {
+                writer.write(output);
+                writer.newLine();
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("Ошибка: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static LocalDate parseDate(String dateStr) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        try {
+            return LocalDate.parse(dateStr, formatter);
+        } catch (DateTimeException e) {
+            throw new IllegalArgumentException("Неверный формат даты рождения.");
+        }
+    }
+
+    private static long parsePhoneNumber(String phoneStr) {
+        try {
+            return Long.parseLong(phoneStr);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Неверный формат номера телефона.");
+        }
+    }
+
+    private static char parseGender(String genderStr) {
+        if (genderStr.equalsIgnoreCase("f") || genderStr.equalsIgnoreCase("m")) {
+            return genderStr.charAt(0);
+        } else {
+            throw new IllegalArgumentException("Неверный формат пола. Допустимы символы 'f' или 'm'.");
+        }
+    }
+}
+```
